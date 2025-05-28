@@ -3,7 +3,6 @@
 from sklearn.cluster import KMeans
 import numpy as np
 import fmt2
-import matplotlib.pyplot as plt
 import stringmethod
 import time
 import copy

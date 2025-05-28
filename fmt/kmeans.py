@@ -105,7 +105,7 @@ tol = 0.01
 S.compute_mep(begin=[-0.558, 1.442], end=[0.623, 0.028], maxsteps=maxsteps, traj_every=1, npts=len(pathX_c), init_guess = string,
               x_min = x_min, y_min = y_min, x_step = x_step, y_step = y_step, flexible=True, tol = tol)
 path_data = np.vstack([pathX, pathY, pathE]).T
-print(path_data)
+
 time_FMT = time.perf_counter()
 
 # S2.compute_mep(begin=[-0.558, 1.442], end=[0.623, 0.028], maxsteps=maxsteps, traj_every=1, npts=len(pathX_c), init_guess = [],
