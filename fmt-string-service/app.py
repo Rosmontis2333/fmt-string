@@ -30,7 +30,7 @@ async def root():
 
 
 @app.post("/uploads")
-async def upload_file(file: UploadFile):
+async def upload_file(file: UploadFile = Query(...)):
     # 检查文件类型
     if file.content_type not in ["text/plain", "application/octet-stream"]:
         return {
@@ -72,7 +72,7 @@ async def upload_file(file: UploadFile):
 
 
 @app.get("/start")
-async def task_start(task_id: str = Query(...)):
+async def task_start(task_id: str = Query(...), number: int = Query(...)):
     # 验证 task_id 的合法性
     if not re.match(r'^[a-f0-9]{64}$', task_id):
         return {
@@ -85,7 +85,7 @@ async def task_start(task_id: str = Query(...)):
             # 使用 subprocess 启动子进程
             path = os.path.join("fmt", "kmeans3.py")
             process = subprocess.Popen(
-                ["python", path, task_id],
+                ["python", path, task_id, number],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True
