@@ -28,6 +28,8 @@ def save_path_data(path_data, filename):
 def calculate(task_id):
     input_file_path = os.path.join("uploads", f"{task_id}.txt")
     x,y,V=parse_file(input_file_path)
+    V = -V
+
     S = stringmethod.String2D(x, y, V)
 
     start = time.perf_counter()
