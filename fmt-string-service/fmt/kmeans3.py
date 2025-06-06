@@ -126,6 +126,6 @@ def calculate():
 
 if __name__ == "__main__":
     task_id, energy_min= str(sys.argv[1]), int(sys.argv[2])
-    calculate(task_id)
+    calculate()
     pass
     # 示例：输入文件路径和输出文件路径

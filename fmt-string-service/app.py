@@ -1,7 +1,6 @@
 import os
 import re
 import subprocess
-import time
 from hashlib import sha256
 from fastapi import FastAPI, UploadFile, Query
 from starlette.middleware.cors import CORSMiddleware
@@ -43,12 +42,8 @@ async def upload_file(file: UploadFile = Query(...)):
         content = await file.read()
         file_hash_sha256 = sha256(content).hexdigest()
 
-        # 获取安全的文件名
-        file_name = os.path.basename(file.filename)
-
         # 生成任务 ID
-        timestamp = int(time.time() * 1000)
-        task_id = file_hash_sha256 + file_name + SALT + str(timestamp)
+        task_id = file_hash_sha256 + SALT
         task_id = sha256(task_id.encode("utf-8")).hexdigest()
 
         # 构造文件路径，添加时间戳避免冲突
