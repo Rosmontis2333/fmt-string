@@ -1,10 +1,11 @@
 <script lang="ts" setup>
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { Button } from '@/components/ui/button'
 import IconDownload from '@/components/icons/IconDownload.vue'
 import InfoDiv from '@/components/InfoDiv.vue'
+import { getServerStatus } from '@/lib/requests.ts'
 
 const progress = ref(48)
 const log = ref<string>(
@@ -102,14 +103,42 @@ const log = ref<string>(
     ' [-1.23000000e+00  1.49400000e+00 -1.07950000e+02]]\n' +
     'The FMT time is 64.842',
 )
+onMounted(async () => {
+  console.log(await getServerStatus())
+})
+
+const handleFile = (e: Event) => {
+  const target = e.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (file) {
+    console.log(file)
+    const reader = new FileReader()
+    reader.readAsText(file)
+    reader.onload = () => console.log(reader.result)
+  }
+}
 </script>
 
 <template>
   <article class="flex flex-col space-y-4">
-    <Input
-      class="border-2 border-zinc-600 rounded-lg h-full w-md mx-auto cursor-pointer"
-      type="file"
-    />
+    <form class="flex justify-between">
+      <label>
+        <span class="font-orbitron">Choose file:</span>
+        <Input
+          class="border-2 border-zinc-600 rounded-lg h-10 w-72 mx-auto cursor-pointer"
+          type="file"
+          @change="handleFile"
+        />
+      </label>
+      <label class="font-orbitron">
+        Start Variable:
+        <Input
+          class="border-2 border-zinc-600 rounded-lg h-10 mx-auto w-72 cursor-pointer"
+          type="text"
+        />
+      </label>
+    </form>
+
     <div class="font-orbitron flex space-x-8">
       <p class="w-fit text-lg text-nowrap">Figure Output</p>
       <div class="flex w-full items-center space-x-2">
@@ -119,7 +148,7 @@ const log = ref<string>(
     </div>
     <img class="border-4 border-zinc-500" src="/src/assets/Figure_1.png" />
     <p class="font-orbitron text-lg text-nowrap">Log Output</p>
-    <InfoDiv>{{log}}</InfoDiv>
+    <InfoDiv>{{ log }}</InfoDiv>
     <div class="flex">
       <Button
         class="font-orbitron m-auto mb-4 rounded-lg border-2 border-zinc-600 cursor-pointer text-orange-500 hover:text-orange-400"
