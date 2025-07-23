@@ -3,7 +3,7 @@ import re
 import subprocess
 from hashlib import sha256
 from fastapi import FastAPI, UploadFile, Query
-from starlette.middleware.cors import CORSMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import StreamingResponse, FileResponse
 
 app = FastAPI()
@@ -22,6 +22,20 @@ OUTPUT_DIR = "output"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 SALT = "rosmontisMeow~"
+
+# 跨域白名单
+origins = [
+    "http://localhost:5173",
+    "http://localhost"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/rosmontis")
 async def root():
