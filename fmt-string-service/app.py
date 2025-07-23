@@ -1,15 +1,19 @@
-import asyncio
 import os
 import re
-import time
+import subprocess
 from hashlib import sha256
-import multipart
 from fastapi import FastAPI, UploadFile, Query
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import StreamingResponse, FileResponse
 
 app = FastAPI()
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 允许所有来源
+    allow_credentials=True,  # 允许携带凭证（如 cookies）
+    allow_methods=["*"],  # 允许所有 HTTP 方法
+    allow_headers=["*"],  # 允许所有 HTTP 头
+)
 # 定义文件存储路径
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)  # 确保目录存在
@@ -39,7 +43,7 @@ async def root():
 
 
 @app.post("/uploads")
-async def upload_file(file: UploadFile):
+async def upload_file(file: UploadFile = Query(...)):
     # 检查文件类型
     if file.content_type not in ["text/plain", "application/octet-stream"]:
         return {
@@ -52,12 +56,8 @@ async def upload_file(file: UploadFile):
         content = await file.read()
         file_hash_sha256 = sha256(content).hexdigest()
 
-        # 获取安全的文件名
-        file_name = os.path.basename(file.filename)
-
         # 生成任务 ID
-        timestamp = int(time.time() * 1000)
-        task_id = file_hash_sha256 + file_name + SALT + str(timestamp)
+        task_id = file_hash_sha256 + SALT
         task_id = sha256(task_id.encode("utf-8")).hexdigest()
 
         # 构造文件路径，添加时间戳避免冲突
@@ -81,7 +81,7 @@ async def upload_file(file: UploadFile):
 
 
 @app.get("/start")
-async def task_start(task_id: str = Query(...)):
+async def task_start(task_id: str = Query(...), number: int = Query(...)):
     # 验证 task_id 的合法性
     if not re.match(r'^[a-f0-9]{64}$', task_id):
         return {
@@ -89,20 +89,28 @@ async def task_start(task_id: str = Query(...)):
             "message": "Invalid task id",
         }
 
-    async def generator():
+    def generator():
         try:
-            # 异步启动子进程
-            path = os.path.join("fmt","kmeans3.py")
-            process = await asyncio.create_subprocess_exec(
-                "python3", path, task_id,
-                stdout=asyncio.subprocess.PIPE,
+            # 使用 subprocess 启动子进程
+            path = os.path.join("fmt", "kmeans3.py")
+            process = subprocess.Popen(
+                ["python", path, task_id, number],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
             )
 
             # 持续读取子进程的输出流
-            async for line in process.stdout:
-                yield line.decode('utf-8')
+            for line in iter(process.stdout.readline, ''):
+                yield line
 
-            await process.wait()
+            # 等待进程结束
+            process.wait()
+
+            # 如果子进程返回非零退出码，读取 stderr 并返回错误信息
+            if process.returncode != 0:
+                error_output = process.stderr.read()
+                yield f"ERROR: {error_output}\n"
 
         except Exception as e:
             yield f"ERROR: {str(e)}\n"

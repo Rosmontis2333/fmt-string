@@ -25,9 +25,11 @@ def save_path_data(path_data, filename):
     """保存路径数据到文本文件"""
     np.savetxt(filename, path_data, fmt='%.6f', header='x y energy')
 
-def calculate(task_id):
+def calculate():
     input_file_path = os.path.join("uploads", f"{task_id}.txt")
     x,y,V=parse_file(input_file_path)
+    V = -V
+
     S = stringmethod.String2D(x, y, V)
 
     start = time.perf_counter()
@@ -44,7 +46,7 @@ def calculate(task_id):
     rows, cols = V.shape
     for i in range(rows):
         for j in range(cols):
-            if V_list[i][j] < -100:
+            if V_list[i][j] < energy_min:
                 points.append([x_list[i], y_list[j]])
                 energy.append(V_list[i][j])
                 weight.append((V_list[i][j]) ** 10)
@@ -123,7 +125,7 @@ def calculate(task_id):
     print('The FMT time is ' + "{:.3f}".format(time_FMT - start))
 
 if __name__ == "__main__":
-    task_id= sys.argv[1]
-    calculate(task_id)
+    task_id, energy_min= str(sys.argv[1]), int(sys.argv[2])
+    calculate()
     pass
     # 示例：输入文件路径和输出文件路径
