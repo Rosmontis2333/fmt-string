@@ -9,6 +9,12 @@ export async function getServerStatus(): Promise<string> {
 export async function uploadFile(file: File): Promise<UploadResponse> {
   const formData = new FormData()
   formData.append('file', file)
-  const response = await instance.post('/uploads', formData)
-  return response.data
+  const response = await instance.post('/uploads', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+  if (response.status === 200) {
+    return response.data
+  } else {
+    throw new Error('Failed to upload file')
+  }
 }

@@ -4,19 +4,12 @@ import Header from '@/components/Header.vue'
 
 <template>
   <main class="m-auto w-full min-h-full h-fit absolute text-zinc-600">
-    <div class="w-2xl m-auto">
+    <div class="w-3xl m-auto bg-zinc-50/60 px-12 py-4 backdrop-blur-sm">
       <Header />
+      <hr class="border-zinc-600 mt-4 mb-8 border" />
       <RouterView />
     </div>
   </main>
 </template>
 
-<style scoped lang="scss">
-main {
-  background-image: url('/src/assets/hexagon.svg');
-  background-size: contain;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-  background-position-x: center;
-}
-</style>
+<style scoped lang="scss"></style>
