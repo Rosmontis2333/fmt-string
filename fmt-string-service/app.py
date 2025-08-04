@@ -24,10 +24,7 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 SALT = "rosmontisMeow~"
 
 # 跨域白名单
-origins = [
-    "http://localhost:5173",
-    "http://localhost"
-]
+origins = ["http://localhost:5173", "http://localhost"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -37,13 +34,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/rosmontis")
 async def root():
     return {"message": "Meow~"}
 
 
 @app.post("/uploads")
-async def upload_file(file: UploadFile = Query(...)):
+async def upload_file(file: UploadFile):
     # 检查文件类型
     if file.content_type not in ["text/plain", "application/octet-stream"]:
         return {
@@ -74,16 +72,13 @@ async def upload_file(file: UploadFile = Query(...)):
         }
 
     except Exception as e:
-        return {
-            "code": 500,
-            "message": f"Failed to process file: {str(e)}"
-        }
+        return {"code": 500, "message": f"Failed to process file: {str(e)}"}
 
 
 @app.get("/start")
-async def task_start(task_id: str = Query(...), number: int = Query(...)):
+async def task_start(task_id: str = Query(...)):
     # 验证 task_id 的合法性
-    if not re.match(r'^[a-f0-9]{64}$', task_id):
+    if not re.match(r"^[a-f0-9]{64}$", task_id):
         return {
             "code": 400,
             "message": "Invalid task id",
@@ -94,14 +89,14 @@ async def task_start(task_id: str = Query(...), number: int = Query(...)):
             # 使用 subprocess 启动子进程
             path = os.path.join("fmt", "kmeans3.py")
             process = subprocess.Popen(
-                ["python", path, task_id, number],
+                ["python", path, task_id],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                text=True
+                text=True,
             )
 
             # 持续读取子进程的输出流
-            for line in iter(process.stdout.readline, ''):
+            for line in iter(process.stdout.readline, ""):
                 yield line
 
             # 等待进程结束
@@ -121,11 +116,10 @@ async def task_start(task_id: str = Query(...), number: int = Query(...)):
     return StreamingResponse(generator(), media_type="text/plain")
 
 
-
 @app.get("/image")
 async def task_image(task_id: str = Query(...)):
     # 验证 task_id 的合法性
-    if not re.match(r'^[a-f0-9]{64}$', task_id):
+    if not re.match(r"^[a-f0-9]{64}$", task_id):
         return {
             "code": 400,
             "message": "Invalid task id",
@@ -139,11 +133,10 @@ async def task_image(task_id: str = Query(...)):
     return FileResponse(img_path, media_type="image/png")
 
 
-
 @app.get("/path")
 async def task_path(task_id: str = Query(...)):
     # 验证 task_id 的合法性
-    if not re.match(r'^[a-f0-9]{64}$', task_id):
+    if not re.match(r"^[a-f0-9]{64}$", task_id):
         return {
             "code": 400,
             "message": "Invalid task id",
@@ -159,4 +152,5 @@ async def task_path(task_id: str = Query(...)):
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)
