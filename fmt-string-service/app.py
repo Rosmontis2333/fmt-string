@@ -43,7 +43,7 @@ async def root():
 
 
 @app.post("/uploads")
-async def upload_file(file: UploadFile = Query(...)):
+async def upload_file(file: UploadFile):
     # 检查文件类型
     if file.content_type not in ["text/plain", "application/octet-stream"]:
         return {

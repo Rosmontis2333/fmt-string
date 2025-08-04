@@ -2,7 +2,7 @@ export interface ServerStatus {
   message: string
 }
 
-export interface UploadResponse {
+export interface FileUploadResponse {
   code: number
   message: string
   task_id?: string
